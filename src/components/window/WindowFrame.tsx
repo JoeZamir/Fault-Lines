@@ -1,6 +1,6 @@
-import { useRef, useState, useCallback } from "react";
+import { useRef, useCallback } from "react";
 import { useDesktop, DesktopWindow } from "@/context/DesktopContext";
-import { X, Minus } from "lucide-react";
+import { X, Minus, Square, Copy } from "lucide-react";
 
 interface WindowFrameProps {
   window: DesktopWindow;
@@ -10,13 +10,11 @@ interface WindowFrameProps {
 }
 
 export default function WindowFrame({ window: win, zIndex, isFocused, children }: WindowFrameProps) {
-  const { closeWindow, minimizeWindow, focusWindow, moveWindow } = useDesktop();
-  const [dragging, setDragging] = useState(false);
+  const { closeWindow, minimizeWindow, focusWindow, moveWindow, toggleMaximizeWindow } = useDesktop();
   const dragOffset = useRef({ x: 0, y: 0 });
 
   const onMouseDown = useCallback((e: React.MouseEvent) => {
     focusWindow(win.id);
-    setDragging(true);
     dragOffset.current = { x: e.clientX - win.position.x, y: e.clientY - win.position.y };
 
     const onMove = (ev: MouseEvent) => {
@@ -26,13 +24,14 @@ export default function WindowFrame({ window: win, zIndex, isFocused, children }
       });
     };
     const onUp = () => {
-      setDragging(false);
       document.removeEventListener("mousemove", onMove);
       document.removeEventListener("mouseup", onUp);
     };
+    if (win.maximized) return;
+
     document.addEventListener("mousemove", onMove);
     document.addEventListener("mouseup", onUp);
-  }, [focusWindow, moveWindow, win.id, win.position]);
+  }, [focusWindow, moveWindow, win.id, win.maximized, win.position]);
 
   if (win.minimized) return null;
 
@@ -62,6 +61,12 @@ export default function WindowFrame({ window: win, zIndex, isFocused, children }
             className="w-6 h-6 rounded flex items-center justify-center hover:bg-secondary transition"
           >
             <Minus className="w-3 h-3 text-muted-foreground" />
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); toggleMaximizeWindow(win.id); }}
+            className="w-6 h-6 rounded flex items-center justify-center hover:bg-secondary transition"
+          >
+            {win.maximized ? <Copy className="w-3 h-3 text-muted-foreground" /> : <Square className="w-3 h-3 text-muted-foreground" />}
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); closeWindow(win.id); }}
