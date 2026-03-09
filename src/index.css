@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+  :root {
+    --background: 220 20% 10%;
+    --foreground: 180 10% 90%;
+    --card: 220 18% 14%;
+    --card-foreground: 180 10% 90%;
+    --popover: 220 18% 14%;
+    --popover-foreground: 180 10% 90%;
+    --primary: 152 60% 45%;
+    --primary-foreground: 220 20% 10%;
+    --secondary: 220 15% 20%;
+    --secondary-foreground: 180 10% 85%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 215 12% 55%;
+    --accent: 152 60% 45%;
+    --accent-foreground: 220 20% 10%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 152 60% 45%;
+    --radius: 0.5rem;
+
+    /* Desktop-specific tokens */
+    --taskbar: 220 22% 8%;
+    --taskbar-foreground: 180 10% 80%;
+    --window-titlebar: 220 18% 16%;
+    --window-titlebar-active: 220 18% 20%;
+    --window-body: 220 18% 12%;
+    --window-border: 220 15% 25%;
+    --desktop-icon-text: 0 0% 100%;
+    --login-bg: 220 25% 6%;
+    --start-menu: 220 20% 11%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+  }
+}
+
+@layer components {
+  .desktop-wallpaper {
+    background-image: url('/wallpaper.jpg');
+    background-size: cover;
+    background-position: center;
+  }
+
+  .window-frame {
+    @apply rounded-lg overflow-hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    border: 1px solid hsl(var(--window-border));
+  }
+
+  .taskbar-panel {
+    background: hsl(var(--taskbar));
+    border-top: 1px solid hsl(var(--window-border));
+    backdrop-filter: blur(12px);
+  }
+
+  .start-menu-panel {
+    background: hsl(var(--start-menu));
+    border: 1px solid hsl(var(--window-border));
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.6);
+  }
+
+  .desktop-icon-btn {
+    @apply flex flex-col items-center gap-1 p-2 rounded-lg cursor-pointer transition-colors;
+  }
+  .desktop-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .desktop-icon-btn:active {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .login-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
+  }
+
+  .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+}
+
+@keyframes window-open {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes window-close {
+  from { opacity: 1; transform: scale(1); }
+  to { opacity: 0; transform: scale(0.9); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-window-open {
+  animation: window-open 0.2s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out forwards;
+}
