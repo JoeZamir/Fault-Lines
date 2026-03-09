@@ -8,6 +8,11 @@ export interface DesktopWindow {
   position: { x: number; y: number };
   size: { width: number; height: number };
   minimized: boolean;
+  maximized: boolean;
+  previousState?: {
+    position: { x: number; y: number };
+    size: { width: number; height: number };
+  };
 }
 
 interface DesktopContextType {
@@ -21,6 +26,8 @@ interface DesktopContextType {
   restoreWindow: (id: string) => void;
   focusWindow: (id: string) => void;
   moveWindow: (id: string, pos: { x: number; y: number }) => void;
+  toggleMaximizeWindow: (id: string) => void;
+  logout: () => void;
   startMenuOpen: boolean;
   setStartMenuOpen: (v: boolean) => void;
 }
@@ -45,6 +52,7 @@ export function DesktopProvider({ children }: { children: React.ReactNode }) {
       position: { x: 100 + offset, y: 60 + offset },
       size: { width: 700, height: 500 },
       minimized: false,
+      maximized: false,
     };
     setWindows((prev) => [...prev, newWin]);
     setFocusedWindowId(id);
@@ -72,7 +80,42 @@ export function DesktopProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const moveWindow = useCallback((id: string, pos: { x: number; y: number }) => {
-    setWindows((prev) => prev.map((w) => (w.id === id ? { ...w, position: pos } : w)));
+    setWindows((prev) => prev.map((w) => (w.id === id && !w.maximized ? { ...w, position: pos } : w)));
+  }, []);
+
+  const toggleMaximizeWindow = useCallback((id: string) => {
+    setWindows((prev) => prev.map((w) => {
+      if (w.id !== id) return w;
+
+      if (w.maximized && w.previousState) {
+        return {
+          ...w,
+          maximized: false,
+          position: w.previousState.position,
+          size: w.previousState.size,
+          previousState: undefined,
+        };
+      }
+
+      return {
+        ...w,
+        maximized: true,
+        previousState: {
+          position: w.position,
+          size: w.size,
+        },
+        position: { x: 0, y: 0 },
+        size: { width: window.innerWidth, height: window.innerHeight - 44 },
+      };
+    }));
+    setFocusedWindowId(id);
+  }, []);
+
+  const logout = useCallback(() => {
+    setUser(null);
+    setWindows([]);
+    setFocusedWindowId(null);
+    setStartMenuOpen(false);
   }, []);
 
   return (
@@ -80,7 +123,8 @@ export function DesktopProvider({ children }: { children: React.ReactNode }) {
       value={{
         user, setUser,
         windows, focusedWindowId,
-        openWindow, closeWindow, minimizeWindow, restoreWindow, focusWindow, moveWindow,
+        openWindow, closeWindow, minimizeWindow, restoreWindow, focusWindow, moveWindow, toggleMaximizeWindow,
+        logout,
         startMenuOpen, setStartMenuOpen,
       }}
     >

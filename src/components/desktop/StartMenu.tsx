@@ -2,11 +2,10 @@ import { useDesktop } from "@/context/DesktopContext";
 import { LogOut, User, Terminal, Shield, FolderOpen, Briefcase, Settings, Info } from "lucide-react";
 
 export default function StartMenu() {
-  const { user, setUser, setStartMenuOpen, openWindow } = useDesktop();
+  const { user, logout, setStartMenuOpen, openWindow } = useDesktop();
 
   const handleLogout = () => {
-    setUser(null);
-    setStartMenuOpen(false);
+    logout();
   };
 
   const handleOpen = (type: string, title: string) => {

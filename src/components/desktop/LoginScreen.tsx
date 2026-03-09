@@ -43,8 +43,8 @@ export default function LoginScreen() {
           <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
             <Monitor className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-xl font-semibold text-foreground">FaultLines</h1>
-          <p className="text-sm text-muted-foreground mt-1">Desktop Environment</p>
+          <h1 className="text-xl font-semibold text-foreground">Sign in to your account</h1>
+          <p className="text-sm text-muted-foreground mt-1">Use your operating system credentials to continue</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
