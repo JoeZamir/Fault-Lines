@@ -6,9 +6,9 @@ const FINAL_CHALLENGE_PASSWORD = "WINNIEBRENDABENJAMIN";
 const UPLOAD_LOGS = [
   "Unlocking Drive...",
   "Uploading to cloud...",
-  "Connecting accounts...",
+  "Connecting social accounts...",
   "Uploading...",
-  "success!...",
+  "success!",
 ];
 
 export default function ExtortionVideoWindow() {
@@ -143,6 +143,7 @@ export default function ExtortionVideoWindow() {
       {showUploadStatus && (
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center p-4">
           <div className="w-full max-w-sm rounded-md border border-border bg-card p-4 shadow-xl space-y-2">
+            <h1 className="text-xl text-primary">Uploading Content...</h1>
             {UPLOAD_LOGS.slice(0, visibleUploadLogs).map((log) => (
               <p key={log} className="text-sm">{log}</p>
             ))}
