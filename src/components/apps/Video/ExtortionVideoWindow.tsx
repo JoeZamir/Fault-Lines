@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Pause, Play, Rewind, FastForward } from "lucide-react";
+import { Pause, Play, Rewind, FastForward, Eye, EyeOff } from "lucide-react";
 
 const DURATION_SECONDS = 60;
 const FINAL_CHALLENGE_PASSWORD = "WINNIEBRENDABENJAMIN";
@@ -16,8 +16,10 @@ export default function ExtortionVideoWindow() {
   const [elapsed, setElapsed] = useState(0);
   const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
   const [challengePassword, setChallengePassword] = useState("");
+  const [showChallengePassword, setShowChallengePassword] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [showUploadStatus, setShowUploadStatus] = useState(false);
+  const [visibleUploadLogs, setVisibleUploadLogs] = useState(0);
 
   useEffect(() => {
     if (!playing || elapsed >= DURATION_SECONDS) return;
@@ -33,6 +35,22 @@ export default function ExtortionVideoWindow() {
       setShowPasswordPrompt(true);
     }
   }, [elapsed]);
+
+  useEffect(() => {
+    if (!showUploadStatus) {
+      setVisibleUploadLogs(0);
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setVisibleUploadLogs((prev) => {
+        if (prev >= UPLOAD_LOGS.length) return prev;
+        return prev + 1;
+      });
+    }, 4000);
+
+    return () => clearTimeout(timeout);
+  }, [showUploadStatus, visibleUploadLogs]);
 
   const seek = (delta: number) => {
     setElapsed((prev) => Math.max(0, Math.min(prev + delta, DURATION_SECONDS)));
@@ -91,15 +109,25 @@ export default function ExtortionVideoWindow() {
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center p-4">
           <div className="w-full max-w-sm rounded-md border border-border bg-card p-4 shadow-xl">
             <p className="text-sm font-semibold mb-2">Enter Password:</p>
-            <input
-              type="password"
-              value={challengePassword}
-              onChange={(e) => {
-                setChallengePassword(e.target.value);
-                setPasswordError("");
-              }}
-              className="w-full h-9 rounded border border-input bg-background px-2 text-sm"
-            />
+            <div className="relative">
+              <input
+                type={showChallengePassword ? "text" : "password"}
+                value={challengePassword}
+                onChange={(e) => {
+                  setChallengePassword(e.target.value);
+                  setPasswordError("");
+                }}
+                className="w-full h-9 rounded border border-input bg-background px-2 pr-9 text-sm"
+              />
+              <button
+                type="button"
+                onClick={() => setShowChallengePassword((show) => !show)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition"
+                aria-label={showChallengePassword ? "Hide password" : "Show password"}
+              >
+                {showChallengePassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
             {passwordError && <p className="text-xs text-destructive mt-2">{passwordError}</p>}
             <button
               onClick={handlePasswordSubmit}
@@ -114,7 +142,7 @@ export default function ExtortionVideoWindow() {
       {showUploadStatus && (
         <div className="absolute inset-0 bg-black/60 flex items-center justify-center p-4">
           <div className="w-full max-w-sm rounded-md border border-border bg-card p-4 shadow-xl space-y-2">
-            {UPLOAD_LOGS.map((log) => (
+            {UPLOAD_LOGS.slice(0, visibleUploadLogs).map((log) => (
               <p key={log} className="text-sm">{log}</p>
             ))}
           </div>
