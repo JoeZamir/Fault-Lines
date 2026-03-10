@@ -19,7 +19,7 @@ export default function PasswordModal({ onSuccess, onCancel }: PasswordModalProp
     } else {
       const remaining = attempts - 1;
       setAttempts(remaining);
-      setError(`Wrong password! ${remaining} attempts left`);
+      setError(`wrong password! ${remaining} attempts left`);
       setPassword("");
       if (remaining <= 0) onCancel();
     }
