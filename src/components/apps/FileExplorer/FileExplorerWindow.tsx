@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FILE_SYSTEM, ENCRYPTED_DRIVES, FSNode } from "@/utils/fileSystem";
 import PasswordModal from "./PasswordModal";
 import { Folder, File, HardDrive, ArrowLeft, ArrowRight, Home, Download, FileText, Image, Music, Video, Plus } from "lucide-react";
@@ -15,6 +15,37 @@ const quickAccess = [
   { icon: Video, label: "Videos" },
 ];
 
+const NAOMI_DRIVE_A: FSNode = {
+  folders: ["Insurance", "manipulation", "Extortion"],
+  files: [],
+  children: {
+    Insurance: {
+      folders: ["_fraud_docs"],
+      files: [],
+      children: {
+        _fraud_docs: {
+          folders: [],
+          files: ["85ad2_claim.pdf", "nq77_audit.docx", "delta-report-9.pdf", "ledger-xt12.doc"],
+        },
+      },
+    },
+    manipulation: {
+      folders: ["_tapes"],
+      files: [],
+      children: {
+        _tapes: {
+          folders: [],
+          files: ["TS_001_094503.mp4", "tape-07-raw.mp4", "m-clip-893.mp4"],
+        },
+      },
+    },
+    Extortion: {
+      folders: [],
+      files: ["_evidence.mp4"],
+    },
+  },
+};
+
 export default function FileExplorerWindow({ startInMyPc = false }: { startInMyPc?: boolean }) {
   const { user, openWindow } = useDesktop();
   const [currentDrive, setCurrentDrive] = useState<string | null>(startInMyPc ? "C" : null);
@@ -24,8 +55,32 @@ export default function FileExplorerWindow({ startInMyPc = false }: { startInMyP
   const [unlockedDrives, setUnlockedDrives] = useState<Set<string>>(new Set(user?.username === "Naomi" ? ["A: archive_"] : []));
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const popupTimers = useRef<number[]>([]);
 
   const drives = useMemo(() => (user?.username === "Naomi" ? [...Object.keys(FILE_SYSTEM), "B: USB_key"] : Object.keys(FILE_SYSTEM)), [user?.username]);
+
+  const fileSystem = useMemo(() => {
+    if (user?.username !== "Naomi") return FILE_SYSTEM;
+    return {
+      ...FILE_SYSTEM,
+      "A: archive_": NAOMI_DRIVE_A,
+    };
+  }, [user?.username]);
+
+  const clearPopupTimers = () => {
+    popupTimers.current.forEach((timer) => window.clearTimeout(timer));
+    popupTimers.current = [];
+  };
+
+  useEffect(() => clearPopupTimers, []);
+
+  const queuePopups = (items: { type: string; title: string }[]) => {
+    clearPopupTimers();
+    items.forEach((item, index) => {
+      const timer = window.setTimeout(() => openWindow(item.type, item.title), index * 1200);
+      popupTimers.current.push(timer);
+    });
+  };
 
   const navigateTo = (driveKey: string, path: string[]) => {
     setCurrentDrive(driveKey);
@@ -51,17 +106,29 @@ export default function FileExplorerWindow({ startInMyPc = false }: { startInMyP
     setUnlockedDrives((prev) => new Set(prev).add(pendingDrive));
     setShowPassword(false);
     navigateTo(pendingDrive, []);
+
     if (user?.username === "Titus") {
-      for (let i = 1; i <= 8; i += 1) {
-        openWindow("decryptedEvidence", `Folder_${i.toString().padStart(2, "0")}`);
-      }
+      queuePopups(Array.from({ length: 8 }, (_, i) => ({
+        type: "decryptedEvidence",
+        title: `Folder_${(i + 1).toString().padStart(2, "0")}`,
+      })));
     }
+
+    if (user?.username === "Naomi") {
+      queuePopups([
+        { type: "decryptedEvidence", title: "Insurance/_fraud_docs" },
+        { type: "decryptedEvidence", title: "manipulation/_tapes" },
+        { type: "decryptedEvidence", title: "Extortion" },
+        { type: "videoEvidence", title: "_evidence.mp4" },
+      ]);
+    }
+
     setPendingDrive(null);
   };
 
   const getCurrentNode = (): FSNode | null => {
     if (!currentDrive || currentDrive === "B: USB_key") return null;
-    let node = FILE_SYSTEM[currentDrive];
+    let node = fileSystem[currentDrive];
     if (!node) return null;
     for (const segment of currentPath) {
       node = node.children?.[segment] as FSNode;
@@ -134,7 +201,13 @@ export default function FileExplorerWindow({ startInMyPc = false }: { startInMyP
                 </button>
               ))}
               {node.files?.map((file) => (
-                <div key={file} className="desktop-icon-btn cursor-default"><File className="w-8 h-8 text-muted-foreground" /><span className="text-xs">{file}</span></div>
+                <button
+                  key={file}
+                  onDoubleClick={() => file === "_evidence.mp4" && openWindow("videoEvidence", "_evidence.mp4")}
+                  className="desktop-icon-btn"
+                >
+                  <File className="w-8 h-8 text-muted-foreground" /><span className="text-xs">{file}</span>
+                </button>
               ))}
             </div>
           )}
