@@ -121,7 +121,16 @@ export default function TerminalWindow() {
     <div className="h-full bg-black text-green-400 font-mono text-xs p-3 flex flex-col select-text">
       <div className="flex-1 overflow-auto space-y-1 select-text">
         {lines.map((line, idx) => (
-          <pre key={`${line.text}-${idx}`} className={line.type === "error" ? "text-red-400 whitespace-pre-wrap select-text" : "text-green-400 whitespace-pre-wrap select-text"}>
+          <pre
+            key={`${line.text}-${idx}`}
+            className={
+              line.type === "error"
+                ? "text-red-400 whitespace-pre-wrap select-text"
+                : line.type === "input"
+                  ? "text-green-300 whitespace-pre-wrap select-text"
+                  : "text-green-500 whitespace-pre-wrap select-text"
+            }
+          >
             {line.text}
           </pre>
         ))}
