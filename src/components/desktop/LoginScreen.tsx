@@ -52,9 +52,9 @@ export default function LoginScreen() {
               sizes="192px"
               className="w-full h-auto object-cover"
             />
+            <p className="text-xl font-bold">Penguin<span className="text-2xl text-primary">OS</span></p>
           </div>
-          <h1 className="text-xl font-semibold text-foreground">Sign in to your account</h1>
-          <p className="text-sm text-muted-foreground mt-1">Use your operating system credentials to continue</p>
+          <h1 className="text-xl font-semibold text-foreground">Sign in</h1>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">

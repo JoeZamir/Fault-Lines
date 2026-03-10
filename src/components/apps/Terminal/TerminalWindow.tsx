@@ -9,9 +9,9 @@ const HELP_TEXT = [
   "help",
   "clear",
   "lsblk",
-  "blkinfo /dev/sdb1",
-  "blkinfo /dev/sdb2",
-  "pi_decrypt open --keystore /dev/sdb2",
+  "blkinfo /dev/sda1",
+  "blkinfo /dev/sda2",
+  "pi_decrypt open --keystore /dev/sda2",
   `pi_decrypt unlock --device /dev/sda1 --dek ${DEK}`,
 ].join("\n");
 
@@ -67,17 +67,17 @@ export default function TerminalWindow() {
       return;
     }
 
-    if (command === "blkinfo /dev/sdb1") {
+    if (command === "blkinfo /dev/sda1") {
       append("output", 'label="A" type="vault_archive"');
       return;
     }
 
-    if (command === "blkinfo /dev/sdb2") {
+    if (command === "blkinfo /dev/sda2") {
       append("output", 'label="B" type="vault_key"');
       return;
     }
 
-    if (command === "pi_decrypt open --keystore /dev/sdb2") {
+    if (command === "pi_decrypt open --keystore /dev/sda2") {
       setBusy(true);
       append("output", "[ pi_decrypt ] Loading keystore metadata...");
       await sleep(700);
