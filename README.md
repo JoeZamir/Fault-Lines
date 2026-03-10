@@ -6,6 +6,8 @@ This guide explains how to run and navigate the **Fault Lines desktop simulation
 
 ## What this app is
 
+prod url: https://faultlinesos.netlify.app/
+
 Fault Lines is an interactive **Linux-style desktop simulation** ("Penguin OS") used to present story evidence and decryption workflows through three different user accounts:
 
 - **Joseph** (encryption workflow)
@@ -13,6 +15,7 @@ Fault Lines is an interactive **Linux-style desktop simulation** ("Penguin OS") 
 - **Naomi** (analysis + decryption + evidence review)
 
 Each account has shared desktop components (taskbar, start menu, core apps), plus role-specific tools.
+This project is a desktop-only design, does not have mobile view.
 
 ---
 
