@@ -118,10 +118,10 @@ export default function TerminalWindow() {
   };
 
   return (
-    <div className="h-full bg-black text-green-400 font-mono text-xs p-3 flex flex-col">
-      <div className="flex-1 overflow-auto space-y-1">
+    <div className="h-full bg-black text-green-400 font-mono text-xs p-3 flex flex-col select-text">
+      <div className="flex-1 overflow-auto space-y-1 select-text">
         {lines.map((line, idx) => (
-          <pre key={`${line.text}-${idx}`} className={line.type === "error" ? "text-red-400" : "text-green-400 whitespace-pre-wrap"}>
+          <pre key={`${line.text}-${idx}`} className={line.type === "error" ? "text-red-400 whitespace-pre-wrap select-text" : "text-green-400 whitespace-pre-wrap select-text"}>
             {line.text}
           </pre>
         ))}
@@ -137,7 +137,7 @@ export default function TerminalWindow() {
       >
         <label className="flex items-center gap-2 border-t border-green-900 pt-2">
           <span>$</span>
-          <input value={input} onChange={(e) => setInput(e.target.value)} className="flex-1 bg-transparent outline-none" />
+          <input value={input} onChange={(e) => setInput(e.target.value)} className="flex-1 bg-transparent outline-none select-text" />
         </label>
       </form>
     </div>
