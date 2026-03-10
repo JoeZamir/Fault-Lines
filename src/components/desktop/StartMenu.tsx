@@ -16,7 +16,7 @@ export default function StartMenu() {
   const recentApps = [
     { icon: Shield, label: "Encryption Tool", type: "EncryptionTool" },
     { icon: FolderOpen, label: "File Explorer", type: "FileExplorer" },
-    { icon: Briefcase, label: "Workspace", type: "placeholder" },
+    { icon: Briefcase, label: "USB analyzer", type: "usbAnalyzer" },
     { icon: Settings, label: "Settings", type: "settings" },
     { icon: Info, label: "About", type: "about" },
   ];
