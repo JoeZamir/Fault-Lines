@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDesktop } from "@/context/DesktopContext";
 import { validateLogin } from "@/utils/auth";
-import { Lock, Monitor, Maximize, Eye, EyeOff } from "lucide-react";
+import { Monitor, Maximize, Eye, EyeOff } from "lucide-react";
 
 export default function LoginScreen() {
   const { setUser } = useDesktop();
@@ -40,8 +40,18 @@ export default function LoginScreen() {
       <div className="absolute inset-0 desktop-wallpaper opacity-20" />
       <div className="relative login-card rounded-2xl p-8 w-[380px] animate-fade-in">
         <div className="flex flex-col items-center mb-6">
-          <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
-            <Monitor className="w-8 h-8 text-primary" />
+          <div className="w-24 h-24 rounded-full flex items-center justify-center mb-4">
+            <img
+              src="/logos/PenguinOSlogo-192.png"
+              srcSet="
+                /logos/PenguinOSlogo-96.png 96w,
+                /logos/PenguinOSlogo-192.png 192w,
+                /logos/PenguinOSlogo.png 512w
+              "
+              alt="PenguinOS logo"
+              sizes="192px"
+              className="w-full h-auto object-cover"
+            />
           </div>
           <h1 className="text-xl font-semibold text-foreground">Sign in to your account</h1>
           <p className="text-sm text-muted-foreground mt-1">Use your operating system credentials to continue</p>
