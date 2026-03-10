@@ -118,6 +118,7 @@ export default function ExtortionVideoWindow() {
                   setPasswordError("");
                 }}
                 className="w-full h-9 rounded border border-input bg-background px-2 pr-9 text-sm"
+                placeholder="password"
               />
               <button
                 type="button"
