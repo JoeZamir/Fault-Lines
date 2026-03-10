@@ -136,9 +136,9 @@ Login as **Naomi** to access advanced investigation tools.
 Use the terminal commands scripted for the story flow:
 
 - `lsblk`
-- `blkinfo /dev/sdb1`
-- `blkinfo /dev/sdb2`
-- `pi_decrypt open --keystore /dev/sdb2`
+- `blkinfo /dev/sda1`
+- `blkinfo /dev/sda2`
+- `pi_decrypt open --keystore /dev/sda2`
   - Enter password when prompted: `John 8:32`
 - `pi_decrypt unlock --device /dev/sda1 --dek <DEK>`
 
