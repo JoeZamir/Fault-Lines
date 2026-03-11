@@ -1,40 +1,52 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { simulateEncryption, EncryptionLog } from "@/utils/encryptionSimulator";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, HardDrive, LockKeyhole, Shield, Unlock } from "lucide-react";
 
-const INTERNAL_DRIVES = [
-  { id: "C:", label: "C:" },
-  { id: "D:", label: "D:" },
+const LOCAL_DRIVES = [
+  { id: "C:", label: "Local Disk C", selectable: false },
+  { id: "D:", label: "New Volume D", selectable: true },
 ];
+
 const EXTERNAL_DRIVES = [
-  { id: "A:", label: "A: archive_" },
-  { id: "B:", label: "B: USB_key" },
+  { id: "A:", label: "A: Faultline", selectable: true },
+  { id: "B:", label: "B: Corsair USB", selectable: true },
 ];
+
+function getPasswordStrength(password: string) {
+  if (password.length < 6) return { label: "Too short", color: "text-red-400" };
+  if (password.length < 10) return { label: "Fair", color: "text-yellow-300" };
+  return { label: "Strong", color: "text-emerald-300" };
+}
 
 export default function EncryptionToolWindow() {
   const [selectedDrive, setSelectedDrive] = useState<string | null>(null);
-  const [kekDrive] = useState("B: USB_key");
+  const [kekDrive, setKekDrive] = useState("B: Corsair USB");
+  const [splitKeyEnabled, setSplitKeyEnabled] = useState(true);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
   const [encrypting, setEncrypting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [logs, setLogs] = useState<EncryptionLog[]>([]);
   const [done, setDone] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showLocalDrives, setShowLocalDrives] = useState(true);
+  const [showExternalDrives, setShowExternalDrives] = useState(true);
+  const logContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const strength = useMemo(() => getPasswordStrength(password), [password]);
+
+  useEffect(() => {
+    if (!logContainerRef.current) return;
+    logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+  }, [logs]);
 
   const handleEncrypt = () => {
-    if (!selectedDrive) return;
+    if (!selectedDrive || encrypting) return;
     setShowPasswordModal(true);
     setPassword("");
-    setPasswordError("");
   };
 
   const handlePasswordSubmit = async () => {
-    if (password !== "John 8:32") {
-      setPasswordError("Incorrect password");
-      return;
-    }
     setShowPasswordModal(false);
     setEncrypting(true);
     setLogs([]);
@@ -44,132 +56,187 @@ export default function EncryptionToolWindow() {
     await simulateEncryption((log, prog) => {
       setLogs((prev) => [...prev, log]);
       setProgress(prog);
-    });
+    }, { splitKeyEnabled });
 
     setDone(true);
     setEncrypting(false);
   };
 
+  const clearRun = () => {
+    setDone(false);
+    setLogs([]);
+    setProgress(0);
+  };
+
   return (
-    <div className="p-4 h-full flex flex-col gap-4 text-sm">
-      {/* Drive Selection */}
+    <div className="relative h-full bg-slate-900 text-slate-100 p-4 flex flex-col gap-4">
+      <div className="flex items-center justify-center gap-3">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-indigo-600/40 border border-cyan-300/30 flex items-center justify-center shadow-inner">
+          <Shield className="w-8 h-8 text-cyan-200" />
+          <LockKeyhole className="w-4 h-4 text-indigo-200 -ml-3 mt-4" />
+        </div>
+        <h2 className="text-2xl font-semibold text-cyan-100 tracking-wide">Drive Crypt</h2>
+      </div>
+
       <div>
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Internal Drives</h3>
-        <div className="flex gap-2">
-          {INTERNAL_DRIVES.map((d) => (
+        <h3 className="text-xs font-semibold text-cyan-200/90 uppercase tracking-wider mb-2">Devices & Drives</h3>
+        <div className="w-4/5 mx-auto rounded-xl bg-slate-800/90 border border-cyan-400/20 p-3 min-h-[220px] space-y-2">
+          <div>
             <button
-              key={d.id}
-              onClick={() => setSelectedDrive(d.id)}
-              className={`px-3 py-2 rounded-lg border transition text-foreground ${
-                selectedDrive === d.id ? "border-primary bg-primary/10" : "border-border hover:bg-secondary"
-              }`}
+              onClick={() => setShowLocalDrives((prev) => !prev)}
+              className="w-full text-left text-xs font-semibold tracking-wider text-cyan-200 hover:text-cyan-100"
             >
-              {d.label}
+              LOCAL DRIVES
             </button>
-          ))}
-        </div>
-        <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 mt-3">External Drives</h3>
-        <div className="flex gap-2">
-          {EXTERNAL_DRIVES.map((d) => (
-            <button
-              key={d.id}
-              onClick={() => setSelectedDrive(d.id)}
-              className={`px-3 py-2 rounded-lg border transition text-foreground ${
-                selectedDrive === d.id ? "border-primary bg-primary/10" : "border-border hover:bg-secondary"
-              }`}
-            >
-              {d.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Controls */}
-      <div className="flex items-center gap-3">
-        <button
-          onClick={handleEncrypt}
-          disabled={!selectedDrive || encrypting}
-          className="px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium disabled:opacity-40 transition"
-        >
-          Encrypt
-        </button>
-        <button
-          disabled={encrypting}
-          className="px-4 py-2 rounded-lg border border-border text-foreground disabled:opacity-40 hover:bg-secondary transition"
-        >
-          Decrypt
-        </button>
-        <span className="text-xs text-muted-foreground">KEK Drive: <span className="text-foreground">{kekDrive}</span></span>
-      </div>
-
-      <label className="flex items-center gap-2 text-xs text-muted-foreground">
-        <input type="checkbox" checked readOnly className="accent-primary" />
-        Split Key Encryption
-      </label>
-
-      {/* Progress */}
-      {(encrypting || done) && (
-        <div>
-          <div className="w-full h-3 bg-secondary rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary transition-all duration-300 rounded-full"
-              style={{ width: `${progress}%` }}
-            />
+            {showLocalDrives && (
+              <div className="pt-2 pl-2 space-y-2">
+                {LOCAL_DRIVES.map((drive) => (
+                  <button
+                    key={drive.id}
+                    onClick={() => drive.selectable && setSelectedDrive(drive.id)}
+                    disabled={!drive.selectable || encrypting}
+                    className={`w-full flex items-center gap-2 rounded-md px-2 py-1.5 border text-sm transition ${
+                      !drive.selectable
+                        ? "opacity-40 cursor-not-allowed border-slate-600"
+                        : selectedDrive === drive.id
+                          ? "border-cyan-300 bg-cyan-500/20"
+                          : "border-slate-600 hover:bg-slate-700"
+                    }`}
+                  >
+                    <HardDrive className="w-4 h-4 text-cyan-200" />
+                    <span>{drive.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-          <p className="text-xs text-muted-foreground mt-1 mono">{progress}%{done && " — Encryption Complete"}</p>
-        </div>
-      )}
 
-      {/* Logs */}
-      {logs.length > 0 && (
-        <div className="flex-1 overflow-auto bg-secondary/30 rounded-lg p-3 mono text-xs space-y-1">
-          {logs.map((log, i) => (
-            <div key={i} className="text-muted-foreground">
-              <span className="text-primary/60">[{log.timestamp.toLocaleTimeString()}]</span> {log.message}
+          <div>
+            <button
+              onClick={() => setShowExternalDrives((prev) => !prev)}
+              className="w-full text-left text-xs font-semibold tracking-wider text-cyan-200 hover:text-cyan-100"
+            >
+              EXTERNAL DRIVES
+            </button>
+            {showExternalDrives && (
+              <div className="pt-2 pl-2 space-y-2">
+                {EXTERNAL_DRIVES.map((drive) => (
+                  <button
+                    key={drive.id}
+                    onClick={() => setSelectedDrive(drive.id)}
+                    disabled={encrypting}
+                    className={`w-full flex items-center gap-2 rounded-md px-2 py-1.5 border text-sm transition ${
+                      selectedDrive === drive.id
+                        ? "border-cyan-300 bg-cyan-500/20"
+                        : "border-slate-600 hover:bg-slate-700"
+                    }`}
+                  >
+                    <HardDrive className="w-4 h-4 text-cyan-200" />
+                    <span>{drive.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-start justify-center gap-6">
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={handleEncrypt}
+            disabled={!selectedDrive || encrypting}
+            className="w-28 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-cyan-500 text-slate-950 font-semibold disabled:opacity-40"
+          >
+            <LockKeyhole className="w-4 h-4" /> Encrypt
+          </button>
+          <button
+            disabled={encrypting}
+            className="w-28 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-cyan-300/40 text-cyan-100 disabled:opacity-40"
+          >
+            <Unlock className="w-4 h-4" /> Decrypt
+          </button>
+        </div>
+
+        <div className="space-y-2 text-sm">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={splitKeyEnabled}
+              onChange={(e) => setSplitKeyEnabled(e.target.checked)}
+              className="accent-cyan-400"
+            />
+            Split Key Encryption
+          </label>
+          <div>
+            <p className="text-xs text-cyan-200/90 mb-1">Choose KEK Drive</p>
+            <select
+              value={kekDrive}
+              onChange={(e) => setKekDrive(e.target.value)}
+              disabled={!splitKeyEnabled || encrypting}
+              className="w-40 rounded-md px-2 py-1.5 bg-slate-800 border border-slate-600 text-slate-100 disabled:opacity-40"
+            >
+              <option value="">drive</option>
+              <option value="B: Corsair USB">B: Corsair USB</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {(encrypting || done) && (
+        <>
+          <div ref={logContainerRef} className="h-36 shrink-0 overflow-auto rounded-xl border border-cyan-400/20 bg-slate-800/80 p-3 text-xs space-y-1 mono">
+            {logs.map((log, i) => (
+              <div key={`${log.timestamp.toISOString()}-${i}`} className="text-slate-300">
+                <span className="text-cyan-300/70">[{log.timestamp.toLocaleTimeString()}]</span> {log.message}
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-4 gap-3 items-center">
+            <div className="col-span-3 w-full h-3 bg-slate-700 rounded-full overflow-hidden">
+              <div className="h-full bg-cyan-400 transition-all duration-500" style={{ width: `${progress}%` }} />
             </div>
-          ))}
-        </div>
+            <button
+              onClick={clearRun}
+              disabled={!done}
+              className="col-span-1 w-full px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              Done
+            </button>
+          </div>
+        </>
       )}
 
-      {done && (
-        <button
-          onClick={() => { setDone(false); setLogs([]); setProgress(0); }}
-          className="self-end px-4 py-2 rounded-lg bg-primary text-primary-foreground font-medium"
-        >
-          Done
-        </button>
-      )}
-
-      {/* Password Modal */}
       {showPasswordModal && (
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-card rounded-xl p-6 w-72 border border-border shadow-xl animate-window-open">
-            <h3 className="text-sm font-semibold text-foreground mb-3">Enter Encryption Password</h3>
+        <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-slate-900 rounded-xl p-6 w-80 border border-cyan-400/30 shadow-xl animate-window-open">
+            <h3 className="text-sm font-semibold text-cyan-100 mb-3">Choose Strong Password</h3>
             <div className="relative">
+              <span className={`absolute left-3 top-2.5 text-xs ${strength.color}`}>{strength.label}</span>
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={(e) => { setPassword(e.target.value); setPasswordError(""); }}
-                className="w-full px-3 py-2 pr-9 rounded-lg bg-secondary text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-primary/50 text-sm"
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-20 pr-9 py-2 rounded-lg bg-slate-800 text-slate-100 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-cyan-300/50 text-sm"
                 placeholder="Password"
                 autoFocus
                 onKeyDown={(e) => e.key === "Enter" && handlePasswordSubmit()}
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground transition">
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-100 transition">
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-            {passwordError && <p className="text-destructive text-xs mt-2">{passwordError}</p>}
             <div className="flex gap-2 mt-4">
               <button
                 onClick={() => setShowPasswordModal(false)}
-                className="flex-1 py-2 rounded-lg border border-border text-foreground text-sm hover:bg-secondary transition"
+                className="flex-1 py-2 rounded-lg border border-slate-600 text-slate-100 text-sm hover:bg-slate-800 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={handlePasswordSubmit}
-                className="flex-1 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium"
+                className="flex-1 py-2 rounded-lg bg-cyan-500 text-slate-950 text-sm font-semibold"
               >
                 Confirm
               </button>
