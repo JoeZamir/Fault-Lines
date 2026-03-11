@@ -51,7 +51,7 @@ export function DesktopProvider({ children }: { children: React.ReactNode }) {
       type,
       title,
       position: { x: 100 + offset, y: 60 + offset },
-      size: { width: 700, height: 500 },
+      size: type === "EncryptionTool" ? { width: 760, height: 640 } : { width: 700, height: 500 },
       minimized: false,
       maximized: false,
     };

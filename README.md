@@ -80,20 +80,19 @@ Across all users, the environment provides:
 
 ## 1) Joseph flow (USB encryption)
 
-Login as **Joseph** to access the **USB Encryption Tool**.
+Login as **Joseph** to access **N-Crypt** (Drive Crypt USB encryption tool).
 
 ### What to do
-1. Open **USB Encryption Tool**.
+1. Open **N-Crypt** from the desktop icon.
 2. Select a target drive from internal/external lists.
 3. Click **Encrypt**.
-4. Enter encryption password:
-   - `John 8:32`
-5. Watch simulated logs + progress completion.
+4. Choose any password in the modal (strength indicator shown inline).
+5. Watch staged logs + progress completion with 3-second intervals.
 
 ### What this demonstrates
-- Split-key style encryption process
-- Password-gated encryption action
-- Timed log/progress simulation
+- Split-key and non-split-key encryption log flows
+- Password capture modal with strength feedback
+- Timed 3-second log/progress simulation
 
 ---
 
@@ -172,7 +171,7 @@ Open `_evidence.mp4` to launch the video UI:
 
 If you need a compact, reliable live demo:
 
-1. **Joseph**: show encryption UI + password gate + progress.
+1. **Joseph**: show N-Crypt (Drive Crypt) UI + password modal + progress.
 2. **Titus**: unlock archive + show staggered auto-open windows + Drive_2 lock.
 3. **Naomi**: run analyzer, execute terminal decrypt flow, open Drive A evidence folders, then launch `_evidence.mp4`.
 
