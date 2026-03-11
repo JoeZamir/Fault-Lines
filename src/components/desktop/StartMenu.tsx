@@ -14,7 +14,7 @@ export default function StartMenu() {
   };
 
   const recentApps = [
-    { icon: Shield, label: "Encryption Tool", type: "EncryptionTool" },
+    { icon: Shield, label: "N-Crypt", type: "EncryptionTool" },
     { icon: FolderOpen, label: "File Explorer", type: "FileExplorer" },
     { icon: Briefcase, label: "USB analyzer", type: "usbAnalyzer" },
     { icon: Settings, label: "Settings", type: "settings" },
