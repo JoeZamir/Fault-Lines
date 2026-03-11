@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDesktop } from "@/context/DesktopContext";
 import { validateLogin } from "@/utils/auth";
-import { Monitor, Maximize, Eye, EyeOff } from "lucide-react";
+import { Maximize, Eye, EyeOff } from "lucide-react";
 
 export default function LoginScreen() {
   const { setUser } = useDesktop();
@@ -63,7 +63,7 @@ export default function LoginScreen() {
               type="text"
               placeholder="Username"
               value={username}
-              onChange={(e) => { setUsername(e.target.value); setError(""); }}
+              onChange={(e) => { setUsername(e.target.value.trim()); setError(""); }}
               className="w-full px-4 py-3 rounded-lg bg-secondary text-foreground placeholder:text-muted-foreground border border-border focus:outline-none focus:ring-2 focus:ring-primary/50 transition"
             />
           </div>

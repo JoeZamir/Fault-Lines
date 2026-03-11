@@ -57,18 +57,21 @@ export default function WindowFrame({ window: win, zIndex, isFocused, children }
         <span className="text-sm font-medium text-foreground truncate">{win.title}</span>
         <div className="flex items-center gap-1">
           <button
+            title="minimize window"
             onClick={(e) => { e.stopPropagation(); minimizeWindow(win.id); }}
             className="w-6 h-6 rounded flex items-center justify-center hover:bg-secondary transition"
           >
             <Minus className="w-3 h-3 text-muted-foreground" />
           </button>
           <button
+            title="maximize window"
             onClick={(e) => { e.stopPropagation(); toggleMaximizeWindow(win.id); }}
             className="w-6 h-6 rounded flex items-center justify-center hover:bg-secondary transition"
           >
             {win.maximized ? <Copy className="w-3 h-3 text-muted-foreground" /> : <Square className="w-3 h-3 text-muted-foreground" />}
           </button>
           <button
+            title="close window"
             onClick={(e) => { e.stopPropagation(); closeWindow(win.id); }}
             className="w-6 h-6 rounded flex items-center justify-center hover:bg-destructive/80 transition"
           >
