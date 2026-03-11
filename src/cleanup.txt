@@ -1,0 +1,43 @@
+Read-only unused-code audit (no files changed)
+I reviewed the repo for likely-unused components/functions/references/dependencies/callbacks and did not modify anything.
+
+High-confidence candidates (worth reviewing first)
+src/components/NavLink.tsx appears to be an orphaned component (exported here, but no inbound usage found in project imports).
+
+src/components/apps/NaomiWorkspace/NaomiWorkspace.tsx appears to be unused (standalone exported app window with no inbound usage found).
+
+src/components/ui/use-toast.ts is a thin re-export wrapper over @/hooks/use-toast; it may be redundant if nobody imports this wrapper directly.
+
+Unused callback/parameter signal from TypeScript
+In src/components/ui/calendar.tsx, _props in both icon component lambdas are declared but not used. This was flagged by tsc --noUnusedLocals --noUnusedParameters.
+
+Likely-unused UI component files (static import graph)
+A static import-graph pass from app/test entrypoints suggests many shadcn-style UI primitives are currently not referenced by reachable app code (examples below):
+
+accordion, alert-dialog, alert, aspect-ratio, avatar, badge, breadcrumb, calendar, carousel, chart, checkbox, collapsible, command, context-menu, drawer, dropdown-menu, form, hover-card, input-otp, menubar, navigation-menu, pagination, popover, progress, radio-group, resizable, scroll-area, select, sidebar, slider, switch, table, tabs, textarea, toggle-group, and use-toast (wrapper).
+Representative files:
+
+Note: this is a static scan; dynamic/lazy/runtime string-based loading can evade it.
+
+Dependency candidates to review
+From package-vs-import usage scanning, these are possible cleanup candidates (depending on future plans/tooling):
+
+Runtime deps likely unused by code imports: @hookform/resolvers, date-fns, framer-motion, zod.
+
+Dev deps to re-check necessity: @tailwindcss/typography, @testing-library/react (if you only use jest-dom + vitest setup currently).
+
+Commands/checks I ran
+✅ python - <<'PY' ... (static TS/TSX import-graph reachability from src/main.tsx + test entrypoints)
+
+✅ rg -n "NavLink" src
+
+✅ rg -n "NaomiWorkspace" src
+
+✅ rg -n "ENCRYPTED_DRIVES|DRIVE_PASSWORD|simulateEncryption|validateLogin|FILE_SYSTEM|use-mobile|useToast|use-toast" src
+
+✅ npx tsc --noEmit --noUnusedLocals --noUnusedParameters -p tsconfig.app.json (reported unused _props in calendar)
+
+⚠️ npx depcheck --json (blocked by registry policy: 403 Forbidden in this environment)
+
+✅ git status --short (clean working tree; no changes made)
+

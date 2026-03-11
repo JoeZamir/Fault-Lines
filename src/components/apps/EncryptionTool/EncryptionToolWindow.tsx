@@ -183,29 +183,31 @@ export default function EncryptionToolWindow() {
         </div>
       </div>
 
-      {(encrypting || done) && (
-        <>
-          <div ref={logContainerRef} className="h-36 shrink-0 overflow-auto rounded-xl border border-cyan-400/20 bg-slate-800/80 p-3 text-xs space-y-1 mono">
-            {logs.map((log, i) => (
-              <div key={`${log.timestamp.toISOString()}-${i}`} className="text-slate-300">
-                <span className="text-cyan-300/70">[{log.timestamp.toLocaleTimeString()}]</span> {log.message}
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-4 gap-3 items-center">
-            <div className="col-span-3 w-full h-3 bg-slate-700 rounded-full overflow-hidden">
-              <div className="h-full bg-cyan-400 transition-all duration-500" style={{ width: `${progress}%` }} />
+      {logs.length > 0 && (
+        <div ref={logContainerRef} className="h-36 overflow-auto rounded-xl border border-cyan-400/20 bg-slate-800/80 p-3 text-xs space-y-1 mono">
+          {logs.map((log, i) => (
+            <div key={`${log.timestamp.toISOString()}-${i}`} className="text-slate-300">
+              <span className="text-cyan-300/70">[{log.timestamp.toLocaleTimeString()}]</span> {log.message}
             </div>
-            <button
-              onClick={clearRun}
-              disabled={!done}
-              className="col-span-1 w-full px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-semibold disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Done
-            </button>
+          ))}
+        </div>
+      )}
+
+      {(encrypting || done) && (
+        <div>
+          <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden">
+            <div className="h-full bg-cyan-400 transition-all duration-500" style={{ width: `${progress}%` }} />
           </div>
-        </>
+        </div>
+      )}
+
+      {done && (
+        <button
+          onClick={clearRun}
+          className="self-end px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-semibold"
+        >
+          Done
+        </button>
       )}
 
       {showPasswordModal && (
