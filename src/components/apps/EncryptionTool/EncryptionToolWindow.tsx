@@ -72,14 +72,13 @@ export default function EncryptionToolWindow() {
     <div className="relative h-full bg-slate-900 text-slate-100 p-4 flex flex-col gap-4">
       <div className="flex items-center justify-center gap-3">
         <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500/30 to-indigo-600/40 border border-cyan-300/30 flex items-center justify-center shadow-inner">
-          <Shield className="w-8 h-8 text-cyan-200" />
+          <Shield className="w-6 h-6 text-cyan-200" />
           <LockKeyhole className="w-4 h-4 text-indigo-200 -ml-3 mt-4" />
         </div>
         <h2 className="text-2xl font-semibold text-cyan-100 tracking-wide">Drive Crypt</h2>
       </div>
 
       <div>
-        <h3 className="text-xs font-semibold text-cyan-200/90 uppercase tracking-wider mb-2">Devices & Drives</h3>
         <div className="w-4/5 mx-auto rounded-xl bg-slate-800/90 border border-cyan-400/20 p-3 min-h-[220px] space-y-2">
           <div>
             <button
@@ -146,15 +145,15 @@ export default function EncryptionToolWindow() {
           <button
             onClick={handleEncrypt}
             disabled={!selectedDrive || encrypting}
-            className="w-28 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-cyan-500 text-slate-950 font-semibold disabled:opacity-40"
+            className="w-28 flex items-center text-sm justify-center gap-2 px-3 py-2 rounded-lg bg-cyan-500 text-slate-950 font-semibold disabled:opacity-40"
           >
-            <LockKeyhole className="w-4 h-4" /> Encrypt
+            <LockKeyhole className="w-3 h-3" /> Encrypt
           </button>
           <button
             disabled={encrypting}
-            className="w-28 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-cyan-300/40 text-cyan-100 disabled:opacity-40"
+            className="w-28 flex items-center text-sm justify-center gap-2 px-3 py-2 rounded-lg border border-cyan-300/40 text-cyan-100 disabled:opacity-40"
           >
-            <Unlock className="w-4 h-4" /> Decrypt
+            <Unlock className="w-3 h-3" /> Decrypt
           </button>
         </div>
 
@@ -171,6 +170,7 @@ export default function EncryptionToolWindow() {
           <div>
             <p className="text-xs text-cyan-200/90 mb-1">Choose KEK Drive</p>
             <select
+              title="drive options"
               value={kekDrive}
               onChange={(e) => setKekDrive(e.target.value)}
               disabled={!splitKeyEnabled || encrypting}
@@ -194,21 +194,21 @@ export default function EncryptionToolWindow() {
       )}
 
       {(encrypting || done) && (
-        <div>
-          <div className="w-full h-3 bg-slate-700 rounded-full overflow-hidden">
+        <div className="flex items-center gap-4 w-full h-7 ">
+          <div className="w-[75%] h-3 bg-slate-700 rounded-full overflow-hidden">
             <div className="h-full bg-cyan-400 transition-all duration-500" style={{ width: `${progress}%` }} />
           </div>
+          {done && (
+            <button
+              onClick={clearRun}
+              className="px-3 py-2 text-sm rounded-lg bg-cyan-500 text-slate-950 font-semibold"
+            >
+              Done
+            </button>
+          )}
         </div>
       )}
 
-      {done && (
-        <button
-          onClick={clearRun}
-          className="self-end px-4 py-2 rounded-lg bg-cyan-500 text-slate-950 font-semibold"
-        >
-          Done
-        </button>
-      )}
 
       {showPasswordModal && (
         <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center z-50">
