@@ -24,6 +24,7 @@ import USBAnalyzerWindow from "@/components/apps/NaomiTools/USBAnalyzerWindow";
 import Drive2Window from "@/components/apps/Drive2/Drive2Window";
 import DecryptedEvidenceWindow from "@/components/apps/NaomiTools/DecryptedEvidenceWindow";
 import ExtortionVideoWindow from "@/components/apps/Video/ExtortionVideoWindow";
+import PhotosWindow from "@/components/apps/Photos/PhotosWindow";
 
 function PlaceholderApp({ title }: { title: string }) {
   return <div className="flex items-center justify-center h-full text-muted-foreground text-sm">{title} — Coming soon</div>;
@@ -245,6 +246,7 @@ function getAppContent(type: string, title: string) {
     case "drive2": return <Drive2Window />;
     case "decryptedEvidence": return <DecryptedEvidenceWindow title={title} />;
     case "videoEvidence": return <ExtortionVideoWindow />;
+    case "photos": return <PhotosWindow title={title} />;
     case "about": return <AboutApp />;
     case "settings": return <SettingsApp />;
     case "trash": return <TrashApp />;
