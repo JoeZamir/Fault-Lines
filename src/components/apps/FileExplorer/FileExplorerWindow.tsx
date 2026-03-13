@@ -73,6 +73,17 @@ const specialCollections: Record<Exclude<QuickAccessLabel, "Home" | "My PC">, { 
   },
 };
 
+const TITUS_POPUP_TITLES = [
+  "x9$-backup",
+  "tmp_42!",
+  "log#773.err",
+  "cache@88",
+  "fin%2024.zip",
+  "??alpha_7",
+  "sys&meta_11",
+  "notes+delta_3.txt",
+];
+
 export default function FileExplorerWindow({ startInMyPc = false }: { startInMyPc?: boolean }) {
   const { user, openWindow } = useDesktop();
   const [currentDrive, setCurrentDrive] = useState<string | null>(startInMyPc ? "C" : null);
@@ -103,10 +114,10 @@ export default function FileExplorerWindow({ startInMyPc = false }: { startInMyP
 
   useEffect(() => clearPopupTimers, []);
 
-  const queuePopups = (items: { type: string; title: string }[]) => {
+  const queuePopups = (items: { type: string; title: string }[], intervalMs = 1200) => {
     clearPopupTimers();
     items.forEach((item, index) => {
-      const timer = window.setTimeout(() => openWindow(item.type, item.title), index * 1200);
+      const timer = window.setTimeout(() => openWindow(item.type, item.title), index * intervalMs);
       popupTimers.current.push(timer);
     });
   };
@@ -145,10 +156,10 @@ export default function FileExplorerWindow({ startInMyPc = false }: { startInMyP
     navigateTo(pendingDrive, []);
 
     if (user?.username === "Titus") {
-      queuePopups(Array.from({ length: 8 }, (_, i) => ({
+      queuePopups(TITUS_POPUP_TITLES.map((title) => ({
         type: "decryptedEvidence",
-        title: `Folder_${(i + 1).toString().padStart(2, "0")}`,
-      })));
+        title,
+      })), 700);
     }
 
     if (user?.username === "Naomi") {
