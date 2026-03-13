@@ -37,7 +37,7 @@ function getAppContent(type: string, title: string) {
     case "EncryptionTool": return <EncryptionToolWindow />;
     case "FileExplorer": return <FileExplorerWindow />;
     case "mypc": return <FileExplorerWindow startInMyPc />;
-    case "terminal": return <TerminalWindow />;
+    case "terminal": return <TerminalWindow title={title} />;
     case "usbAnalyzer": return <USBAnalyzerWindow />;
     case "drive2": return <Drive2Window />;
     case "decryptedEvidence": return <DecryptedEvidenceWindow title={title} />;
