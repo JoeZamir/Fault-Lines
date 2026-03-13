@@ -1,6 +1,8 @@
 import { useDesktop } from "@/context/DesktopContext";
 import DesktopIcon from "./DesktopIcon";
-import { Monitor, Trash2, Settings, Shield, FolderOpen, Terminal, ScanSearch, HardDrive } from "lucide-react";
+import { Monitor, Trash2, Settings, Shield, FolderOpen, Terminal, HardDrive, Usb, Search, KeyRound } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { ComponentType } from "react";
 
 const SHARED_ICONS = [
   { id: "fileExplorer", label: "File Explorer", icon: FolderOpen, app: "FileExplorer", title: "File Explorer" },
@@ -10,7 +12,27 @@ const SHARED_ICONS = [
   { id: "settings", label: "Settings", icon: Settings, app: "settings", title: "Settings" },
 ];
 
-const USER_ICONS: Record<string, { id: string; label: string; icon: typeof Monitor; app: string; title: string; iconClassName?: string; containerClassName?: string }[]> = {
+function USBAnalyzerIcon({ className }: { className?: string }) {
+  return (
+    <div className={`relative ${className ?? ""}`}>
+      <Usb className="w-full h-full" />
+      <Search className="w-1/2 h-1/2 absolute -right-1 -bottom-1 bg-[#31114f] rounded-full p-0.5" />
+    </div>
+  );
+}
+
+function PiDecryptIcon({ className }: { className?: string }) {
+  return (
+    <div className={`relative ${className ?? ""}`}>
+      <Terminal className="w-full h-full" />
+      <KeyRound className="w-1/2 h-1/2 absolute -right-1 -bottom-1 bg-[#1b1c42] rounded-full p-0.5" />
+    </div>
+  );
+}
+
+type DesktopIconComponent = LucideIcon | ComponentType<{ className?: string }>;
+
+const USER_ICONS: Record<string, { id: string; label: string; icon: DesktopIconComponent; app: string; title: string; iconClassName?: string; containerClassName?: string }[]> = {
   encryptionTool: [{
     id: "encryptionTool",
     label: "N-Crypt",
@@ -22,8 +44,24 @@ const USER_ICONS: Record<string, { id: string; label: string; icon: typeof Monit
   }],
   fileExplorer: [{ id: "drive2", label: "Drive_2", icon: HardDrive, app: "drive2", title: "Drive_2" }],
   naomiWorkspace: [
-    { id: "usbAnalyzer", label: "USB analyzer", icon: ScanSearch, app: "usbAnalyzer", title: "USB analyzer" },
-    { id: "piDecrypt", label: "pi_decrypt", icon: Terminal, app: "terminal", title: "pi_decrypt terminal" },
+    {
+      id: "usbAnalyzer",
+      label: "USB analyzer",
+      icon: USBAnalyzerIcon,
+      app: "usbAnalyzer",
+      title: "USB analyzer",
+      iconClassName: "text-[#ffb703]",
+      containerClassName: "bg-gradient-to-br from-[#35134d]/90 to-[#4b1f6f]/90 border border-[#ffb703]/40",
+    },
+    {
+      id: "piDecrypt",
+      label: "pi_decrypt",
+      icon: PiDecryptIcon,
+      app: "terminal",
+      title: "pi_decrypt terminal",
+      iconClassName: "text-[#6fe7dd]",
+      containerClassName: "bg-gradient-to-br from-[#14213d]/90 to-[#1b1c42]/90 border border-[#6fe7dd]/40",
+    },
   ],
 };
 
