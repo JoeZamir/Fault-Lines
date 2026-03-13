@@ -9,8 +9,8 @@ const ANALYSIS_LOGS = [
   "Examining encryption hash...",
   "Determining encryption type...",
   "Split Key encryption detected...",
-  "Encryption key necessary for decryption",
-  "Analysis complete...",
+  "Encryption key necessary for decryption...",
+  "Analysis complete",
 ];
 
 export default function USBAnalyzerWindow() {
