@@ -7,7 +7,7 @@ export interface FSNode {
 export const FILE_SYSTEM: Record<string, FSNode> = {
   C: { folders: ["Windows", "Program Files", "Users"], files: ["pagefile.sys"] },
   D: { folders: ["Games", "Documents", "Backups"], files: ["readme.txt"] },
-  "A: archive_": {
+  "A: fltlin3s": {
     folders: ["FAULT LINES"],
     files: [],
     children: {
@@ -25,5 +25,5 @@ export const FILE_SYSTEM: Record<string, FSNode> = {
   },
 };
 
-export const ENCRYPTED_DRIVES = ["A: archive_"];
+export const ENCRYPTED_DRIVES = ["A: fltlin3s"];
 export const DRIVE_PASSWORD = "John 8:32";
