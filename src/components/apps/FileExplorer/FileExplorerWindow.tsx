@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FILE_SYSTEM, ENCRYPTED_DRIVES, FSNode } from "@/utils/fileSystem";
 import PasswordModal from "./PasswordModal";
-import { Folder, File, HardDrive, ArrowLeft, ArrowRight, Home, Download, FileText, Image, Music, Video, Plus } from "lucide-react";
+import { Folder, File, HardDrive, ArrowLeft, ArrowRight, Home, Download, FileText, Image, Music, Video, Plus, Monitor } from "lucide-react";
 import { useDesktop } from "@/context/DesktopContext";
+import { GALLERY_IMAGES } from "@/utils/galleryData";
 
 interface HistoryEntry { path: string[]; driveKey: string }
+type ExplorerView = "home" | "myPc" | "drive" | "special";
+type QuickAccessLabel = "Home" | "My PC" | "Downloads" | "Documents" | "Pictures" | "Music" | "Videos";
 
-const quickAccess = [
+const quickAccess: { icon: typeof Home; label: QuickAccessLabel }[] = [
   { icon: Home, label: "Home" },
+  { icon: Monitor, label: "My PC" },
   { icon: Download, label: "Downloads" },
   { icon: FileText, label: "Documents" },
   { icon: Image, label: "Pictures" },
@@ -46,6 +50,29 @@ const NAOMI_DRIVE_A: FSNode = {
   },
 };
 
+const specialCollections: Record<Exclude<QuickAccessLabel, "Home" | "My PC">, { folders: string[]; files: string[] }> = {
+  Downloads: {
+    folders: ["Installers", "Compressed"],
+    files: ["release-notes.txt", "penguin-shell-update.deb", "screenshots.zip"],
+  },
+  Documents: {
+    folders: ["Work", "Receipts", "Projects"],
+    files: ["QuarterlyReport.pdf", "MeetingMinutes.docx", "README.md"],
+  },
+  Pictures: {
+    folders: ["Wallpapers", "Camera"],
+    files: GALLERY_IMAGES.map((image) => image.name),
+  },
+  Music: {
+    folders: ["Albums", "Podcasts"],
+    files: ["ambient-loop.mp3", "conference-keynote.ogg", "night-drive.flac"],
+  },
+  Videos: {
+    folders: ["Recordings", "Captures"],
+    files: ["intro.mp4", "walkthrough.mov", "presentation.mkv"],
+  },
+};
+
 export default function FileExplorerWindow({ startInMyPc = false }: { startInMyPc?: boolean }) {
   const { user, openWindow } = useDesktop();
   const [currentDrive, setCurrentDrive] = useState<string | null>(startInMyPc ? "C" : null);
@@ -55,6 +82,8 @@ export default function FileExplorerWindow({ startInMyPc = false }: { startInMyP
   const [unlockedDrives, setUnlockedDrives] = useState<Set<string>>(new Set(user?.username === "Naomi" ? ["A: archive_"] : []));
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [activeView, setActiveView] = useState<ExplorerView>(startInMyPc ? "myPc" : "home");
+  const [activeQuickAccess, setActiveQuickAccess] = useState<QuickAccessLabel>(startInMyPc ? "My PC" : "Home");
   const popupTimers = useRef<number[]>([]);
 
   const drives = useMemo(() => (user?.username === "Naomi" ? [...Object.keys(FILE_SYSTEM), "B: USB_key"] : Object.keys(FILE_SYSTEM)), [user?.username]);
@@ -85,6 +114,7 @@ export default function FileExplorerWindow({ startInMyPc = false }: { startInMyP
   const navigateTo = (driveKey: string, path: string[]) => {
     setCurrentDrive(driveKey);
     setCurrentPath(path);
+    setActiveView("drive");
     const entry = { path, driveKey };
     const newHistory = [...history.slice(0, historyIndex + 1), entry];
     setHistory(newHistory);
@@ -92,12 +122,19 @@ export default function FileExplorerWindow({ startInMyPc = false }: { startInMyP
   };
 
   const handleDriveClick = (driveKey: string) => {
-    if (driveKey === "B: USB_key") return;
+    if (driveKey === "B: USB_key") {
+      setCurrentDrive("B: USB_key");
+      setCurrentPath([]);
+      setActiveView("drive");
+      setActiveQuickAccess("My PC");
+      return;
+    }
     if (ENCRYPTED_DRIVES.includes(driveKey) && !unlockedDrives.has(driveKey)) {
       setPendingDrive(driveKey);
       setShowPassword(true);
       return;
     }
+    setActiveQuickAccess("My PC");
     navigateTo(driveKey, []);
   };
 
@@ -137,6 +174,37 @@ export default function FileExplorerWindow({ startInMyPc = false }: { startInMyP
     return node;
   };
 
+  const handleQuickAccessClick = (label: QuickAccessLabel) => {
+    setActiveQuickAccess(label);
+    setCurrentPath([]);
+
+    if (label === "Home") {
+      setCurrentDrive(null);
+      setActiveView("home");
+      return;
+    }
+
+    if (label === "My PC") {
+      setCurrentDrive(null);
+      setActiveView("myPc");
+      return;
+    }
+
+    setCurrentDrive(null);
+    setActiveView("special");
+  };
+
+  const openFile = (file: string) => {
+    if (file === "_evidence.mp4") {
+      openWindow("videoEvidence", "_evidence.mp4");
+      return;
+    }
+
+    const selectedImage = GALLERY_IMAGES.find((image) => image.name === file);
+    if (selectedImage) {
+      openWindow("photos", selectedImage.name);
+    }
+  };
 
   const goBack = () => {
     if (historyIndex > 0) {
@@ -144,6 +212,8 @@ export default function FileExplorerWindow({ startInMyPc = false }: { startInMyP
       setHistoryIndex(historyIndex - 1);
       setCurrentDrive(prev.driveKey);
       setCurrentPath(prev.path);
+      setActiveView("drive");
+      setActiveQuickAccess("My PC");
     }
   };
 
@@ -153,60 +223,125 @@ export default function FileExplorerWindow({ startInMyPc = false }: { startInMyP
       setHistoryIndex(historyIndex + 1);
       setCurrentDrive(next.driveKey);
       setCurrentPath(next.path);
+      setActiveView("drive");
+      setActiveQuickAccess("My PC");
     }
   };
+
   const node = getCurrentNode();
-  const addressBar = currentDrive ? `${currentDrive}:/${currentPath.join("/")}` : "Home";
+  const specialItems = activeQuickAccess in specialCollections ? specialCollections[activeQuickAccess as Exclude<QuickAccessLabel, "Home" | "My PC">] : null;
+
+  const addressBar =
+    activeView === "home"
+      ? "Home"
+      : activeView === "myPc"
+        ? "My PC"
+        : activeView === "special"
+          ? activeQuickAccess
+          : currentDrive
+            ? `${currentDrive}:/${currentPath.join("/")}`
+            : "Home";
 
   return (
-    <div className="h-full flex flex-col text-sm relative">
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-border bg-secondary/30">
-        <button onClick={goBack} disabled={historyIndex <= 0} className="p-1 rounded hover:bg-secondary disabled:opacity-30"><ArrowLeft className="w-4 h-4" /></button>
-        <button onClick={goForward} disabled={historyIndex >= history.length - 1} className="p-1 rounded hover:bg-secondary disabled:opacity-30"><ArrowRight className="w-4 h-4" /></button>
-        <div className="flex-1 px-3 py-1.5 bg-secondary rounded-lg mono text-xs truncate">{addressBar}</div>
-        <button className="text-xs px-2 py-1 rounded border border-border flex items-center gap-1"><Plus className="w-3 h-3" /> New</button>
+    <div className="relative flex h-full flex-col text-sm">
+      <div className="flex items-center gap-2 border-b border-border bg-secondary/30 px-3 py-2">
+        <button onClick={goBack} disabled={historyIndex <= 0} className="rounded p-1 hover:bg-secondary disabled:opacity-30"><ArrowLeft className="h-4 w-4" /></button>
+        <button onClick={goForward} disabled={historyIndex >= history.length - 1} className="rounded p-1 hover:bg-secondary disabled:opacity-30"><ArrowRight className="h-4 w-4" /></button>
+        <div className="mono flex-1 truncate rounded-lg bg-secondary px-3 py-1.5 text-xs">{addressBar}</div>
+        <button className="flex items-center gap-1 rounded border border-border px-2 py-1 text-xs"><Plus className="h-3 w-3" /> New</button>
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        <div className="w-48 border-r border-border p-2 space-y-3 overflow-auto">
+        <div className="w-52 space-y-3 overflow-auto border-r border-border p-2">
           <div>
             <p className="text-[10px] uppercase text-muted-foreground">Quick access</p>
-            {quickAccess.map((q) => <div key={q.label} className="flex items-center gap-2 px-1 py-1 text-xs"><q.icon className="w-3 h-3" />{q.label}</div>)}
+            {quickAccess.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => handleQuickAccessClick(item.label)}
+                className={`mt-0.5 flex w-full items-center gap-2 rounded px-2 py-1 text-xs ${activeQuickAccess === item.label ? "bg-primary/10 text-primary" : "hover:bg-secondary"}`}
+              >
+                <item.icon className="h-3.5 w-3.5" />
+                {item.label}
+              </button>
+            ))}
           </div>
           <div>
-            <p className="text-[10px] uppercase text-muted-foreground">My PC</p>
-            {drives.map((d) => (
-              <button key={d} onClick={() => handleDriveClick(d)} className={`w-full flex items-center gap-2 px-2 py-1 rounded text-xs ${currentDrive === d ? "bg-primary/10 text-primary" : "hover:bg-secondary"}`}>
-                <HardDrive className="w-3.5 h-3.5" />{d}
+            <p className="text-[10px] uppercase text-muted-foreground">Drives</p>
+            {drives.map((drive) => (
+              <button key={drive} onClick={() => handleDriveClick(drive)} className={`w-full flex items-center gap-2 px-2 py-1 rounded text-xs ${currentDrive === drive ? "bg-primary/10 text-primary" : "hover:bg-secondary"}`}>
+                <HardDrive className="h-3.5 w-3.5" />{drive}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="flex-1 p-3 overflow-auto">
-          {!currentDrive && (
+        <div className="flex-1 overflow-auto p-3">
+          {activeView === "home" && (
             <>
-              <h4 className="text-xs font-semibold mb-2">Quick access</h4>
-              <div className="grid grid-cols-3 gap-2 mb-4">{quickAccess.map((q) => <div key={q.label} className="desktop-icon-btn"><q.icon className="w-8 h-8 text-primary" /><span className="text-xs">{q.label}</span></div>)}</div>
-              <h4 className="text-xs font-semibold mb-2">Recent</h4>
-              <div className="text-xs text-muted-foreground">report.pdf, archive.sig, notes.txt</div>
+              <h4 className="mb-2 text-xs font-semibold">Home</h4>
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {quickAccess.slice(2).map((item) => (
+                  <button key={item.label} type="button" className="desktop-icon-btn" onDoubleClick={() => handleQuickAccessClick(item.label)}>
+                    <item.icon className="h-8 w-8 text-primary" />
+                    <span className="text-xs">{item.label}</span>
+                  </button>
+                ))}
+              </div>
+              <h4 className="mb-2 text-xs font-semibold">Recent</h4>
+              <div className="text-xs text-muted-foreground">QuarterlyReport.pdf, screenshots.zip, aurora-notes.txt</div>
             </>
           )}
-          {currentDrive === "B: USB_key" && <p className="text-xs text-muted-foreground">vault_key mounted. Use terminal tools for decryption.</p>}
-          {currentDrive && node && (
+
+          {activeView === "myPc" && (
+            <>
+              <h4 className="mb-3 text-xs font-semibold">My PC</h4>
+              <div className="grid grid-cols-3 gap-3">
+                {drives.map((drive) => (
+                  <button key={drive} type="button" onDoubleClick={() => handleDriveClick(drive)} className="desktop-icon-btn">
+                    <HardDrive className="h-8 w-8 text-primary" />
+                    <span className="text-xs">{drive}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          {activeView === "special" && specialItems && (
+            <div className="grid grid-cols-4 gap-2">
+              {specialItems.folders.map((folder) => (
+                <button key={folder} className="desktop-icon-btn">
+                  <Folder className="h-8 w-8 text-primary" /><span className="text-xs">{folder}</span>
+                </button>
+              ))}
+              {specialItems.files.map((file) => {
+                const galleryImage = GALLERY_IMAGES.find((image) => image.name === file);
+                return (
+                  <button key={file} onDoubleClick={() => openFile(file)} className="desktop-icon-btn">
+                    {galleryImage ? (
+                      <img src={galleryImage.thumb} alt={file} className="h-8 w-8 rounded object-cover ring-1 ring-white/20" />
+                    ) : (
+                      <File className="h-8 w-8 text-muted-foreground" />
+                    )}
+                    <span className="text-xs">{file}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {activeView === "drive" && currentDrive === "B: USB_key" && <p className="text-xs text-muted-foreground">vault_key mounted. Use terminal tools for decryption.</p>}
+          {activeView === "drive" && currentDrive && node && (
             <div className="grid grid-cols-4 gap-2">
               {node.folders?.map((folder) => (
                 <button key={folder} onDoubleClick={() => navigateTo(currentDrive, [...currentPath, folder])} className="desktop-icon-btn">
-                  <Folder className="w-8 h-8 text-primary" /><span className="text-xs">{folder}</span>
+                  <Folder className="h-8 w-8 text-primary" /><span className="text-xs">{folder}</span>
                 </button>
               ))}
               {node.files?.map((file) => (
-                <button
-                  key={file}
-                  onDoubleClick={() => file === "_evidence.mp4" && openWindow("videoEvidence", "_evidence.mp4")}
-                  className="desktop-icon-btn"
-                >
-                  <File className="w-8 h-8 text-muted-foreground" /><span className="text-xs">{file}</span>
+                <button key={file} onDoubleClick={() => openFile(file)} className="desktop-icon-btn">
+                  <File className="h-8 w-8 text-muted-foreground" /><span className="text-xs">{file}</span>
                 </button>
               ))}
             </div>
