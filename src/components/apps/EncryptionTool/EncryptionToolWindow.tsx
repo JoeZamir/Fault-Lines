@@ -75,7 +75,7 @@ export default function EncryptionToolWindow() {
           <Shield className="w-6 h-6 text-cyan-200" />
           <LockKeyhole className="w-4 h-4 text-indigo-200 -ml-3 mt-4" />
         </div>
-        <h2 className="text-2xl font-semibold text-cyan-100 tracking-wide">Drive Crypt</h2>
+        <h2 className="text-2xl font-semibold text-cyan-100 tracking-wide">N-Crypt</h2>
       </div>
 
       <div>
